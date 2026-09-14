@@ -51,6 +51,12 @@ dsh plugin --profile web why dsh-whale-aquarium
 dsh --profile web --dump-config | grep -n whale-aquarium
 ```
 
+**更新到新版本**（从 GitHub 装的会重新解析到最新提交；改完一样要重启 profile）
+
+```sh
+dsh plugin --profile web update dsh-whale-aquarium
+```
+
 **卸载**（会把包和它的配置层一起撤掉）
 
 ```sh
