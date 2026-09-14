@@ -7,7 +7,9 @@
 
 一群 DSH 官方鲸鱼标志在你整个界面之上游动：鼠标靠近就加速躲开，点一下画面整群四散。图层完全穿透——不挡点击、不挡输入、不影响任何快捷键。
 
-![DSH 界面上的鲸鱼水族箱：一群官方鲸鱼标志在面板之上游动](docs/images/aquarium.png)
+![鲸鱼在界面里游动，鼠标靠近时鱼群四散](docs/images/demo.gif)
+
+<sub>10 秒演示：安静巡游 → 鼠标逼近 → 整群四散。 (720×467, 0.5 MB)</sub>
 
 > **非官方插件 · Unofficial plugin.** 与 DeepSeek 无关联、未获其授权或背书。
 > Not affiliated with, authorized by, or endorsed by DeepSeek.

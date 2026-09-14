@@ -2,3 +2,11 @@ node_modules/
 *.log
 *.tgz
 .DS_Store
+
+# 本地工具与素材（不进仓库）
+.tools/
+deliver/
+*.pvt
+*.mov
+*.mp4
+!docs/**/*.mp4
