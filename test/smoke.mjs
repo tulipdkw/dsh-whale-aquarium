@@ -10,7 +10,7 @@
  * Run: node test/smoke.mjs
  */
 import assert from 'node:assert/strict'
-import { readFileSync } from 'node:fs'
+import { existsSync, readFileSync } from 'node:fs'
 import vm from 'node:vm'
 
 const source = readFileSync(new URL('../lib/client.js', import.meta.url), 'utf8')
@@ -27,7 +27,35 @@ vm.createContext(sandbox)
 vm.runInContext(source, sandbox, { filename: 'lib/client.js' })
 
 assert.ok(registration, 'bundle must call window.__ModuleLoader__.load')
-assert.equal(registration.id, 'dsh-whale-aquarium', 'bundle id must be the package name')
+
+/* ── the packaging contract ───────────────────────────────────────────────────
+ * DSH derives all of this from package.json at boot, so a mismatch here is a
+ * broken install rather than a broken render — check it in CI, not in the browser.
+ * The most common footgun: renaming the package and forgetting the bundle id.
+ */
+
+const pkg = JSON.parse(readFileSync(new URL('../package.json', import.meta.url), 'utf8'))
+assert.equal(registration.id, pkg.name, 'the bundle id MUST equal the package name (client-modules keys factories by it)')
+
+const clientRel = pkg.exports?.['./client']?.default
+assert.equal(clientRel, './lib/client.js', 'dsh.client requires an "./client" export')
+assert.ok(existsSync(new URL(`../${clientRel.slice(2)}`, import.meta.url)), `${clientRel} must exist`)
+assert.ok(existsSync(new URL('../lib/index.js', import.meta.url)), 'the node half must exist for Loader to mount the row')
+
+assert.equal(pkg.dsh?.client?.platform, 'web', 'dsh.client.platform must be web')
+assert.ok(Array.isArray(pkg.dsh?.client?.inject), 'dsh.client.inject must be an array (unknown names are ignored, not fatal)')
+
+const patchRel = pkg.dsh?.bundle?.patch
+assert.equal(patchRel, './cordis.patch.yml', 'a Profile Bundle must declare dsh.bundle.patch')
+// Parsed by name rather than by dependency: this repo has no dependencies at all,
+// and the shaped check below is what actually catches the rename footgun.
+const patchText = readFileSync(new URL(`../${patchRel.slice(2)}`, import.meta.url), 'utf8')
+assert.match(patchText, /^\s*-\s*insert:/m, 'the patch layer must insert rows')
+const patchNames = [...patchText.matchAll(/^\s*name:\s*['"]?([^'"\s]+)['"]?\s*$/gm)].map((m) => m[1])
+assert.ok(
+	patchNames.includes(pkg.name),
+	`the patch layer must insert a row named after the package: expected ${pkg.name}, found ${JSON.stringify(patchNames)}`,
+)
 
 /* ── React stub ───────────────────────────────────────────────────────────── */
 
