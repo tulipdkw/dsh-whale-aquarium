@@ -1,0 +1,20 @@
+name: test
+
+# The shipped artifact is lib/*.js with no build step, so the one thing CI has to
+# prove is that the bundle still registers, the plugin still applies, and the
+# whale loop still paints. `node test/smoke.mjs` does exactly that headlessly.
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: node test/smoke.mjs

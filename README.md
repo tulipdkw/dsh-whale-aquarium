@@ -14,23 +14,30 @@ A whale aquarium for the DeepSeek Harness web UI: a school of the official DSH w
 
 ## 安装
 
-需要 DSH 0.1.2 以上的 `dsh` CLI。**装完要重启该 profile**（关掉再启动 `dsh web`），浏览器半才会进 boot graph。
+需要一个带 `dsh plugin` 子命令的 DSH（本文按 `0.1.2-rc.1` 验证）。**装完要重启该 profile**（关掉再启动 `dsh web`），浏览器半才会进 boot graph。
 
-### 从 npm
+### 从 GitHub（主推，不需要发 npm）
+
+```sh
+dsh plugin --profile web add github:<你的用户名>/KeepWhales
+# 例如
+dsh plugin --profile web add github:kevin/KeepWhales
+```
+
+### 从本地目录 / tarball（开发时最快）
+
+```sh
+git clone https://github.com/<你>/KeepWhales && cd KeepWhales
+dsh plugin --profile web add file:$PWD
+```
+
+### 从 npm（可选，暂未发布）
 
 ```sh
 dsh plugin --profile web add dsh-whale-aquarium
 ```
 
-### 直接从 GitHub（不需要先发 npm）
-
-```sh
-dsh plugin --profile web add github:<你的用户名>/<仓库名>
-# 例如
-dsh plugin --profile web add github:kevin/KeepWhales
-```
-
-两种方式都会把包装进 `$DSH_HOME/profiles/web`，并自动把该 bundle 追加到 profile 的 `dsh.profile.bundles` 层叠里（`dsh plugin` 是 pnpm 的转发器，安装后会按「已安装状态」重新对齐 bundles 列表）。
+以上任何一种都会把包装进 `$DSH_HOME/profiles/web`，并自动把该 bundle 追加到 profile 的 `dsh.profile.bundles` 层叠里（`dsh plugin` 是 pnpm 的转发器，安装后会按「已安装状态」重新对齐 bundles 列表）。
 
 确认装上了：
 
@@ -92,13 +99,26 @@ node test/smoke.mjs
 
 ### 发布（维护者）
 
+分发只需要 GitHub，**不需要发 npm**——`dsh plugin` 是 pnpm 的转发器，`github:` 与 `file:` 规格都能装，并按真实包名对齐 `dsh.profile.bundles`。
+
 ```sh
-git init && git add -A && git commit -m "dsh-whale-aquarium 0.1.0"
-git remote add origin git@github.com:<你>/KeepWhales.git && git push -u origin main
-npm publish --access public          # 可选；不发 npm 也能用 github: 安装
+git add -A && git commit -m "..." 
+git remote add origin git@github.com:<你>/KeepWhales.git
+git push -u origin main
 ```
 
-改了 `lib/` 之后记得升 `version` 再发。
+**发布前先做一次真装验证**（比发布本身更重要）：
+
+```sh
+npm pack                                                   # 打 tarball
+dsh plugin --profile web add file:$PWD/dsh-whale-aquarium-0.1.0.tgz
+# 重启 dsh web，确认侧边栏底部出现 🐋、界面上有鱼
+dsh plugin --profile web remove dsh-whale-aquarium          # 不满意就撤
+```
+
+改了 `lib/` 之后记得升 `package.json` 的 `version`。
+
+**以后想上 npm**（可选）：`npm login` 后 `npm publish`；若改成自己的 scope（`@你/dsh-whale-aquarium`），首次发布要 `--access public` 或在 `package.json` 里加 `"publishConfig": { "access": "public" }`。注意 npm 的发布近似不可逆（`unpublish` 仅 72 小时内），所以务必先 `npm publish --dry-run` + 上面那次 tarball 安装。
 
 ## 版权、商标与致谢
 
@@ -119,10 +139,10 @@ npm publish --access public          # 可选；不发 npm 也能用 github: 安
 
 ## English
 
-A DSH **Profile Bundle** that adds a whale aquarium to the web UI. Install, then restart the profile:
+A DSH **Profile Bundle** that adds a whale aquarium to the web UI. Distribute through GitHub — no npm release needed. Install, then restart the profile:
 
 ```sh
-dsh plugin --profile web add dsh-whale-aquarium   # or: github:<you>/<repo>
+dsh plugin --profile web add github:<you>/KeepWhales   # or: file:/path/to/KeepWhales
 ```
 
 It uses the official whale mark paths (including the two official swim poses DSH itself uses), registers only additive slots (`shell.overlay`, `sidebar.footer.action`, `settings.section`), stays fully click-through, follows the active color scheme, and needs no build step. Toggle it from the 🐋 button at the sidebar foot; tune it under Settings → Whale Aquarium. Settings live in `localStorage`. Uninstall with `dsh plugin --profile web remove dsh-whale-aquarium`.
