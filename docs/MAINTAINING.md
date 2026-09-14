@@ -69,7 +69,9 @@ dsh  deepseek-harness  cordis-plugin  whale  aquarium  wallpaper  web-ui  easter
 
 **仓库头像 / social preview**：建议**不要**单独用官方鲸鱼标志充当（见 README 的品牌指南说明），用 🐳 或自绘图形更稳。
 
-**截图**：把界面截图放到 `docs/images/aquarium.png`，然后去掉 README 里那行 `![鲸鱼水族箱](docs/images/aquarium.png)` 的注释符。截图里出现鲸鱼没问题——那是产品截图。
+**截图**：`docs/images/aquarium.png` 已被 README 引用（2560×1319、约 155 KB）。换图时保持同名即可，细节见 `docs/images/README.md`。截图里出现鲸鱼没问题——那是产品截图。
+
+**注意（以后要发 npm 时）**：README 用的是相对路径 `docs/images/aquarium.png`，而 `docs/` 不在 `package.json` 的 `files` 白名单里，**npm 页面上这张图会裂**。要么把图片加进 `files`，要么把 README 里的路径换成 `https://raw.githubusercontent.com/tulipdkw/dsh-whale-aquarium/main/docs/images/aquarium.png`（GitHub 和 npm 两边都能显示）。
 
 可选徽章（CI 通过后可以直接粘到 README 顶部）：
 
