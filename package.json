@@ -1,6 +1,6 @@
 {
   "name": "dsh-whale-aquarium",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "description": "A whale aquarium for the DeepSeek Harness web UI: a school of the official DSH whale mark swimming over the whole frame, fleeing your cursor.",
   "type": "module",
   "main": "lib/index.js",

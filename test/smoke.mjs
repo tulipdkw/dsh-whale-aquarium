@@ -123,26 +123,36 @@ assert.equal(byName.get('settings.section').options.id, 'whale-aquarium')
 /* ── drive the aquarium ───────────────────────────────────────────────────── */
 
 const calls = { arc: 0, bezierCurveTo: 0, clearRect: 0, fill: 0, stroke: 0 }
-/** Alpha in force at each stroke() — bubbles are the only stroked primitive. */
+/** Alpha in force at each stroke() — bubbles and ripples are the stroked primitives. */
 const strokeAlphas = []
 /** Every color actually painted, so palette regressions are catchable. */
 const fillColors = new Set()
 const strokeColors = new Set()
-/** Circle radii and per-frame circle counts: the bubble size range and the cap. */
+/** Circle radii per frame: bubbles (<= 7px) and ripples (up to ~230px). */
 const arcRadii = []
+const arcByFrame = []
 const arcsPerFrame = []
 let arcsThisFrame = 0
+/** World position of the first drawn fish per frame — how the test measures speed. */
+const posByFrame = []
+let frameNo = 0
 const g = {
 	beginPath() {}, bezierCurveTo() { calls.bezierCurveTo++ },
-	arc(x, y, r) { calls.arc++; arcsThisFrame++; arcRadii.push(r) },
+	arc(x, y, r) { calls.arc++; arcsThisFrame++; arcRadii.push(r); (arcByFrame[frameNo] ||= []).push(r) },
 	closePath() {}, lineTo() {}, moveTo() {},
 	fill() { calls.fill++; fillColors.add(g.fillStyle) },
 	stroke() { calls.stroke++; strokeAlphas.push(g.globalAlpha); strokeColors.add(g.strokeStyle) },
 	// One clearRect per frame, so it is the frame boundary: bubbles are drawn
 	// three times each (body, rim, shine), so this bounds the live count.
 	clearRect() { calls.clearRect++; arcsPerFrame.push(arcsThisFrame); arcsThisFrame = 0 },
-	restore() {}, rotate() {}, save() {}, scale() {},
-	setTransform() {}, translate() {},
+	restore() {}, rotate() {}, save() {}, scale() {}, setTransform() {},
+	// Each fish translates to its world position first, then by the constant
+	// centering offset (−WHALE_W/2, −WHALE_H/2); record only the former.
+	translate(x, y) {
+		if (frameNo === 0 || Math.abs(x + 11.58) > 0.05 || Math.abs(y + 8.52) > 0.05) {
+			if (posByFrame[frameNo] === undefined) posByFrame[frameNo] = { x, y }
+		}
+	},
 	fillStyle: '', globalAlpha: 1, lineWidth: 1, strokeStyle: '',
 }
 
@@ -151,15 +161,23 @@ let frames = 0
 // 200 frames is ~40 bubbles, so "the size range reaches its cap" is deterministic
 // instead of a 1-in-30 flake.
 const MAX_FRAMES = 200
+/** The synthetic click lands here, so burst-vs-baseline is measurable. */
+const CLICK_AT = 40
+const listeners = {}
 const win = {
 	devicePixelRatio: 2,
 	innerWidth: 1200,
 	innerHeight: 800,
-	addEventListener() {},
+	addEventListener(type, fn) { (listeners[type] ||= []).push(fn) },
 	removeEventListener() {},
 	requestAnimationFrame(cb) {
 		// Synchronous, bounded: the loop must be re-entrant-safe and finite.
-		if (frames++ < MAX_FRAMES) cb()
+		frames++
+		frameNo = frames
+		if (frames === CLICK_AT) {
+			for (const fn of listeners.pointerdown ?? []) fn({ clientX: 600, clientY: 400 })
+		}
+		if (frames <= MAX_FRAMES) cb()
 		return frames
 	},
 	cancelAnimationFrame() {},
@@ -195,17 +213,70 @@ assert.ok(fillColors.has('#ffffff'), 'bubbles must paint a filled white shine')
 assert.ok(fillColors.has('#38bdf8'), 'light-scheme bubbles must use the soft sky body tint')
 
 // Bubble size range and cap (DEFAULTS: bubbleSize 7 → radii span 1.2–7, and the
-// shine dot bottoms out at 0.7). Bounds only, no distribution assumptions, so
-// this cannot flake while still catching a broken range expression.
-const minArc = Math.min(...arcRadii)
-const maxArc = Math.max(...arcRadii)
+// shine dot bottoms out at 0.7). Measured on the frames BEFORE the synthetic
+// click, so ripples (up to ~230px) cannot pollute the bubble bound. Bounds only,
+// no distribution assumptions, so this cannot flake.
+const preClickArcs = arcByFrame.slice(0, CLICK_AT).flat()
+const minArc = Math.min(...preClickArcs)
+const maxArc = Math.max(...preClickArcs)
 assert.ok(minArc >= 0.6, `no circle may be smaller than the shine floor, got ${minArc}`)
 assert.ok(maxArc <= 7.5, `no bubble may exceed bubbleSize (7), got ${maxArc}`)
 assert.ok(maxArc >= 5, `the size range must actually reach up toward its cap, got ${maxArc}`)
 // 70 bubbles x 3 circles is the ceiling; a per-frame count above it means the cap
 // is not being applied.
 const peakArcs = Math.max(...arcsPerFrame)
-assert.ok(peakArcs <= 70 * 3, `per-frame circle count ${peakArcs} exceeds the 70-bubble cap`)
+assert.ok(peakArcs <= 70 * 3 + 16, `per-frame circle count ${peakArcs} exceeds the 70-bubble cap`)
+
+/* ── 点击水波：出现 → 扩散 → 约 1 秒后消失 ─────────────────────────────────── */
+
+const biggestArcIn = (f) => Math.max(0, ...(arcByFrame[f] ?? [0]))
+// +4 帧（约 0.07s）时水波半径已到 ~50px；+30 帧（0.5s）应更大；+70 帧（1.17s）已超出
+// 1.05s 的寿命，必须消失。阈值 30px 足以把水波和气泡（≤7px）分开。
+assert.ok(biggestArcIn(CLICK_AT + 4) > 30, `点击后应立刻出现水波，实得半径 ${biggestArcIn(CLICK_AT + 4)}`)
+assert.ok(
+	biggestArcIn(CLICK_AT + 30) > biggestArcIn(CLICK_AT + 4),
+	`水波应持续扩散：${biggestArcIn(CLICK_AT + 4)} → ${biggestArcIn(CLICK_AT + 30)}`,
+)
+assert.ok(biggestArcIn(CLICK_AT + 70) <= 30, `水波应在约 1 秒后消失，实得 ${biggestArcIn(CLICK_AT + 70)}`)
+
+/* ── 惊散：起步速度冲高，约 1 秒后回到巡航速度 ─────────────────────────────── */
+
+/** Median per-frame displacement of one fish: robust against wrap-around jumps. */
+function medianSpeed(from, to) {
+	const steps = []
+	for (let f = from; f < to; f++) {
+		const a = posByFrame[f]
+		const b = posByFrame[f + 1]
+		if (a && b) steps.push(Math.hypot(b.x - a.x, b.y - a.y))
+	}
+	steps.sort((p, q) => p - q)
+	return steps.length === 0 ? 0 : steps[Math.floor(steps.length / 2)]
+}
+/** Peak per-frame displacement in a window, ignoring wrap-around jumps (>100px). */
+function peakSpeed(from, to) {
+	const steps = []
+	for (let f = from; f < to; f++) {
+		const a = posByFrame[f]
+		const b = posByFrame[f + 1]
+		if (a && b) {
+			const d = Math.hypot(b.x - a.x, b.y - a.y)
+			if (d < 100) steps.push(d)
+		}
+	}
+	return steps.length === 0 ? 0 : Math.max(...steps)
+}
+const baseline = medianSpeed(5, CLICK_AT - 1)
+const peak = peakSpeed(CLICK_AT + 1, CLICK_AT + 10) // 点击后 0.02–0.17s：冲量峰值
+const afterOneSecond = medianSpeed(CLICK_AT + 55, CLICK_AT + 70) // 0.92–1.17s
+assert.ok(peak >= 2.2 * baseline, `点击后应明显加速：巡航 ${baseline.toFixed(2)} → 峰值 ${peak.toFixed(2)} px/帧`)
+assert.ok(
+	afterOneSecond <= 0.5 * peak,
+	`约 1 秒后应基本回落：峰值 ${peak.toFixed(2)} → 1 秒后 ${afterOneSecond.toFixed(2)} px/帧`,
+)
+assert.ok(
+	afterOneSecond <= 1.5 * baseline,
+	`1 秒后不应仍明显超速：${afterOneSecond.toFixed(2)} vs 巡航 ${baseline.toFixed(2)} px/帧`,
+)
 cleanup()
 assert.equal(frames, MAX_FRAMES + 1, 'cleanup must stop the loop (no further rAF requests)')
 
@@ -238,4 +309,9 @@ const titleRow = page.children[0]
 assert.equal(titleRow.type, 'div')
 assert.equal(render(titleRow.children[0]).type, 'svg', 'the settings title must show the mark too')
 
-console.log('smoke: ok — bundle registers, plugin applies, 3 slots mount, whale loop paints', JSON.stringify(calls))
+console.log(
+	'smoke: ok — bundle registers, plugin applies, 3 slots mount, whale loop paints',
+	JSON.stringify(calls),
+	`| speed 巡航→峰值→1s后: ${baseline.toFixed(2)} → ${peak.toFixed(2)} → ${afterOneSecond.toFixed(2)} px/帧`,
+	`| ripple radius @+4f: ${biggestArcIn(CLICK_AT + 4).toFixed(0)}px`,
+)
