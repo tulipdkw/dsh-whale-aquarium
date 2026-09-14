@@ -128,17 +128,29 @@ const strokeAlphas = []
 /** Every color actually painted, so palette regressions are catchable. */
 const fillColors = new Set()
 const strokeColors = new Set()
+/** Circle radii and per-frame circle counts: the bubble size range and the cap. */
+const arcRadii = []
+const arcsPerFrame = []
+let arcsThisFrame = 0
 const g = {
-	beginPath() {}, bezierCurveTo() { calls.bezierCurveTo++ }, arc() { calls.arc++ },
+	beginPath() {}, bezierCurveTo() { calls.bezierCurveTo++ },
+	arc(x, y, r) { calls.arc++; arcsThisFrame++; arcRadii.push(r) },
 	closePath() {}, lineTo() {}, moveTo() {},
 	fill() { calls.fill++; fillColors.add(g.fillStyle) },
 	stroke() { calls.stroke++; strokeAlphas.push(g.globalAlpha); strokeColors.add(g.strokeStyle) },
-	clearRect() { calls.clearRect++ }, restore() {}, rotate() {}, save() {}, scale() {},
+	// One clearRect per frame, so it is the frame boundary: bubbles are drawn
+	// three times each (body, rim, shine), so this bounds the live count.
+	clearRect() { calls.clearRect++; arcsPerFrame.push(arcsThisFrame); arcsThisFrame = 0 },
+	restore() {}, rotate() {}, save() {}, scale() {},
 	setTransform() {}, translate() {},
 	fillStyle: '', globalAlpha: 1, lineWidth: 1, strokeStyle: '',
 }
 
 let frames = 0
+// Enough frames that the bubble draws stop being a coin flip: ~12 spawns/s over
+// 200 frames is ~40 bubbles, so "the size range reaches its cap" is deterministic
+// instead of a 1-in-30 flake.
+const MAX_FRAMES = 200
 const win = {
 	devicePixelRatio: 2,
 	innerWidth: 1200,
@@ -147,7 +159,7 @@ const win = {
 	removeEventListener() {},
 	requestAnimationFrame(cb) {
 		// Synchronous, bounded: the loop must be re-entrant-safe and finite.
-		if (frames++ < 24) cb()
+		if (frames++ < MAX_FRAMES) cb()
 		return frames
 	},
 	cancelAnimationFrame() {},
@@ -181,8 +193,21 @@ assert.ok(maxStrokeAlpha >= 0.5, `bubble strokes must be visible, got max alpha 
 assert.ok(!strokeColors.has('#0c4a6e'), 'light-scheme bubbles must not use the dark navy rim')
 assert.ok(fillColors.has('#ffffff'), 'bubbles must paint a filled white shine')
 assert.ok(fillColors.has('#38bdf8'), 'light-scheme bubbles must use the soft sky body tint')
+
+// Bubble size range and cap (DEFAULTS: bubbleSize 7 → radii span 1.2–7, and the
+// shine dot bottoms out at 0.7). Bounds only, no distribution assumptions, so
+// this cannot flake while still catching a broken range expression.
+const minArc = Math.min(...arcRadii)
+const maxArc = Math.max(...arcRadii)
+assert.ok(minArc >= 0.6, `no circle may be smaller than the shine floor, got ${minArc}`)
+assert.ok(maxArc <= 7.5, `no bubble may exceed bubbleSize (7), got ${maxArc}`)
+assert.ok(maxArc >= 5, `the size range must actually reach up toward its cap, got ${maxArc}`)
+// 70 bubbles x 3 circles is the ceiling; a per-frame count above it means the cap
+// is not being applied.
+const peakArcs = Math.max(...arcsPerFrame)
+assert.ok(peakArcs <= 70 * 3, `per-frame circle count ${peakArcs} exceeds the 70-bubble cap`)
 cleanup()
-assert.equal(frames, 25, 'cleanup must stop the loop (no further rAF requests)')
+assert.equal(frames, MAX_FRAMES + 1, 'cleanup must stop the loop (no further rAF requests)')
 
 /* ── the sidebar toggle and the settings page render ──────────────────────── */
 
