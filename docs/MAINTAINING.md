@@ -71,10 +71,10 @@ dsh  deepseek-harness  cordis-plugin  whale  aquarium  wallpaper  web-ui  easter
 
 **截图**：把界面截图放到 `docs/images/aquarium.png`，然后去掉 README 里那行 `![鲸鱼水族箱](docs/images/aquarium.png)` 的注释符。截图里出现鲸鱼没问题——那是产品截图。
 
-可选徽章（把 `<你>` 换成用户名后放进 README 顶部）：
+可选徽章（CI 通过后可以直接粘到 README 顶部）：
 
 ```markdown
-[![test](https://github.com/<你>/dsh-whale-aquarium/actions/workflows/test.yml/badge.svg)](https://github.com/<你>/dsh-whale-aquarium/actions/workflows/test.yml)
+[![test](https://github.com/tulipdkw/dsh-whale-aquarium/actions/workflows/test.yml/badge.svg)](https://github.com/tulipdkw/dsh-whale-aquarium/actions/workflows/test.yml)
 ```
 
 ## 分发方式

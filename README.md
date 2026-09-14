@@ -18,7 +18,7 @@
 一条命令，然后**重启** DSH：
 
 ```sh
-dsh plugin --profile web add github:<你的用户名>/dsh-whale-aquarium
+dsh plugin --profile web add github:tulipdkw/dsh-whale-aquarium
 ```
 
 ```sh
@@ -34,7 +34,7 @@ dsh web
 **从本地目录或 tarball**（自己改了代码想试）
 
 ```sh
-git clone https://github.com/<你的用户名>/dsh-whale-aquarium && cd dsh-whale-aquarium
+git clone https://github.com/tulipdkw/dsh-whale-aquarium && cd dsh-whale-aquarium
 dsh plugin --profile web add file:$PWD
 ```
 
@@ -117,7 +117,7 @@ MIT，见 [LICENSE](LICENSE)。
 **A whale aquarium for the DSH (DeepSeek Harness) web UI.** A school of the official DSH whale mark swims over the whole frame, flees your cursor, and scatters when you click. The layer is fully click-through.
 
 ```sh
-dsh plugin --profile web add github:<you>/dsh-whale-aquarium
+dsh plugin --profile web add github:tulipdkw/dsh-whale-aquarium
 dsh web   # restart the profile (a page reload is not enough)
 ```
 
