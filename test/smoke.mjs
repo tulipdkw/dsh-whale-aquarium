@@ -123,9 +123,12 @@ assert.equal(byName.get('settings.section').options.id, 'whale-aquarium')
 /* ── drive the aquarium ───────────────────────────────────────────────────── */
 
 const calls = { arc: 0, bezierCurveTo: 0, clearRect: 0, fill: 0, stroke: 0 }
+/** Alpha in force at each stroke() — bubbles are the only stroked primitive. */
+const strokeAlphas = []
 const g = {
 	beginPath() {}, bezierCurveTo() { calls.bezierCurveTo++ }, arc() { calls.arc++ },
-	closePath() {}, lineTo() {}, moveTo() {}, fill() { calls.fill++ }, stroke() { calls.stroke++ },
+	closePath() {}, lineTo() {}, moveTo() {}, fill() { calls.fill++ },
+	stroke() { calls.stroke++; strokeAlphas.push(g.globalAlpha) },
 	clearRect() { calls.clearRect++ }, restore() {}, rotate() {}, save() {}, scale() {},
 	setTransform() {}, translate() {},
 	fillStyle: '', globalAlpha: 1, lineWidth: 1, strokeStyle: '',
@@ -160,6 +163,12 @@ const cleanup = effects.at(-1)()
 assert.ok(calls.clearRect > 0, 'the frame loop must have painted')
 assert.ok(calls.fill > 0, 'whales must have been filled')
 assert.ok(calls.bezierCurveTo > 0, 'whales are drawn from the real bezier paths')
+
+// Bubbles: visible at the DEFAULT opacity. v1 drew a 0.22-alpha hairline here and
+// nobody could see it, so this is asserted rather than eyeballed.
+assert.ok(strokeAlphas.length > 0, 'bubbles must spawn and be stroked')
+const maxStrokeAlpha = Math.max(...strokeAlphas)
+assert.ok(maxStrokeAlpha >= 0.5, `bubble strokes must be visible, got max alpha ${maxStrokeAlpha}`)
 cleanup()
 assert.equal(frames, 25, 'cleanup must stop the loop (no further rAF requests)')
 
