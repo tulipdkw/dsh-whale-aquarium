@@ -1,150 +1,128 @@
 # 🐳 dsh-whale-aquarium
 
+**给 DSH（DeepSeek Harness）Web 界面养一缸鲸鱼。**
+
+一群 DSH 官方鲸鱼标志在你整个界面之上游动：鼠标靠近就加速躲开，点一下画面整群四散。图层完全穿透——不挡点击、不挡输入、不影响任何快捷键。
+
+<!-- 截图：把你的界面截图放到 docs/images/aquarium.png，然后删掉下面这行的注释符
+![鲸鱼水族箱](docs/images/aquarium.png)
+-->
+
 > **非官方插件 · Unofficial plugin.** 与 DeepSeek 无关联、未获其授权或背书。
 > Not affiliated with, authorized by, or endorsed by DeepSeek.
 
-给 **DeepSeek Harness** Web UI 的鲸鱼水族箱：一群 DSH 官方鲸鱼标志在你整个界面之上游动，鼠标靠近就躲开，点一下整群四散。
-
-A whale aquarium for the DeepSeek Harness web UI: a school of the official DSH whale mark swimming over the whole frame, fleeing your cursor.
-
-- 用的是**官方鲸鱼路径**（`FISH_LOGO_PATH`），并且用的是 DSH 自己在会话首屏用的那两套官方游动姿态（`HERO_SWIM_UP_PATH` / `HERO_SWIM_DOWN_PATH`）——摆尾是逐控制点插值，不是 CSS 变形糊出来的。
-- 图层**完全穿透**：不挡点击、不挡输入、不影响任何快捷键。
-- 跟随明暗主题自动换色，深色是浅蓝鲸群 + 一条金色锦鲤，浅色是深海蓝。
-- 想在界面上留个开关：侧边栏底部有一个鲸鱼标志图标（就是官方标志本身，不是 emoji）；细调在 设置 → Whale Aquarium。
+---
 
 ## 安装
 
-需要一个带 `dsh plugin` 子命令的 DSH（本文按 `0.1.2-rc.1` 验证）。**装完要重启该 profile**（关掉再启动 `dsh web`），浏览器半才会进 boot graph。
-
-### 从 GitHub（主推，不需要发 npm）
+一条命令，然后**重启** DSH：
 
 ```sh
 dsh plugin --profile web add github:<你的用户名>/KeepWhales
-# 例如
-dsh plugin --profile web add github:kevin/KeepWhales
 ```
 
-### 从本地目录 / tarball（开发时最快）
+```sh
+# 装完后重启 web profile（不是刷新浏览器页面）
+dsh web
+```
+
+重启后：侧边栏底部出现鲸鱼标志按钮，界面上开始有鲸群游动。
+
+<details>
+<summary>其他安装方式 / 卸载 / 前置条件</summary>
+
+**从本地目录或 tarball**（自己改了代码想试）
 
 ```sh
 git clone https://github.com/<你>/KeepWhales && cd KeepWhales
 dsh plugin --profile web add file:$PWD
 ```
 
-### 从 npm（可选，暂未发布）
+**从前置条件说起**：`dsh plugin` 是把参数转发给 pnpm 执行的，所以需要机器上有 pnpm：
 
 ```sh
-dsh plugin --profile web add dsh-whale-aquarium
+npm i -g pnpm        # 或 corepack enable pnpm
 ```
 
-以上任何一种都会把包装进 `$DSH_HOME/profiles/web`，并自动把该 bundle 追加到 profile 的 `dsh.profile.bundles` 层叠里（`dsh plugin` 是 pnpm 的转发器，安装后会按「已安装状态」重新对齐 bundles 列表）。
-
-确认装上了：
+**确认装上了**
 
 ```sh
 dsh plugin --profile web why dsh-whale-aquarium
 dsh --profile web --dump-config | grep -n whale-aquarium
 ```
 
-### 卸载
+**卸载**（会把包和它的配置层一起撤掉）
 
 ```sh
 dsh plugin --profile web remove dsh-whale-aquarium
 ```
 
+浏览器里残留的设置可以顺手清掉：Console 执行 `localStorage.removeItem('dsh-whale-aquarium/v1')`。
+
+</details>
+
 ## 使用
 
-- **侧边栏底部的鲸鱼标志图标**：一键开关（用的是官方标志 SVG，跟鱼群里游的是同一个图形）。
-- **设置 → Whale Aquarium**：数量 / 体型 / 游速 / 透明度 / 避险半径 / 气泡 / 混合模式 / 朝向翻转。
-- **鼠标靠近**鲸鱼会加速躲开，**点一下画面**整群会四散。
-- 设置存在浏览器 `localStorage`（`dsh-whale-aquarium/v1`），不写进 DSH 配置，也不会同步到别的浏览器。
-
-## 它是怎么接进 DSH 的
-
-一个包，两个面：
-
-| 位置 | 作用 |
+| 想做 | 在哪 |
 | --- | --- |
-| `package.json` → `dsh.bundle.patch` | 声明这是 **Profile Bundle**：装完后 DSH 会把 `cordis.patch.yml` 当作一层 patch 叠到 profile 上 |
-| `cordis.patch.yml` | 插入一行 Loader row：`id: whale-aquarium, name: dsh-whale-aquarium` |
-| `lib/index.js` | **node 半**：空的 `apply()`，只为了让 Loader 有一个宿主侧 row 可挂 |
-| `package.json` → `dsh.client` + `exports["./client"]` | 声明**浏览器半**：client modules 扫描到这个 row 的包后，把 `lib/client.js` 放进 `window.__DSH_BOOT__` 的 boot graph |
-| `lib/client.js` | 浏览器半：以 `window.__ModuleLoader__.load({ id, factory })` 注册，`factory(require)` 返回一个 Cordis 插件 `{ name, inject, apply(ctx) }` |
+| 一键开关水族箱 | 侧边栏底部的**鲸鱼标志按钮**（点击切换，开启时变主题色） |
+| 调数量 / 体型 / 游速 / 透明度 | 设置 → **Whale Aquarium** |
+| 调避险半径、气泡、混合模式、朝向 | 同上 |
+| 逗鱼 | 鼠标靠近它们会躲；**点一下画面**整群四散 |
 
-它只往三个**增量插槽**里注册，不替换任何出厂 UI：
+- **避险半径**：鼠标进入这个距离内鲸鱼就开始逃，默认 150px。
+- **混合模式**：让鲸鱼与界面颜色做 `mix-blend-mode`，更融进背景，略耗性能，默认关。
+- **朝向翻转**：万一鲸鱼看着像在倒着游，点一下即可。
+- 设置存在浏览器 `localStorage`，**会记住**（不写进 DSH 配置，也不跨浏览器同步）。
 
-- `shell.overlay` — 整框浮层（在全部列之上、滚动容器之外、本身穿透点击），一个 `<canvas>` + 一个 rAF 循环；
-- `sidebar.footer.action` — 侧边栏底部的鲸鱼标志开关；
-- `settings.section` — 设置面板里的一页。
+## 常见问题
 
-所有副作用（canvas、监听器、样式）都在 `apply` 内创建、由 `ctx.slots` / `ctx.on` 的 disposer 持有，卸载即全部消失。
+**装完没反应？**
+必须**重启 profile**（`dsh web` 关掉重开），不是刷新浏览器页面。浏览器半的代码是在 profile 启动时读入并缓存的。
 
-**没有构建步骤**：`lib/*.js` 就是产物，所以从 Git 安装不需要任何编译。
+**鲸鱼浮在界面上面，不是真正的背景？**
+是的，这是 DSH 目前的限制，不是 bug。原因和取舍写在 [docs/HOW-IT-WORKS.md](docs/HOW-IT-WORKS.md#为什么是浮在最上层)。默认 45% 透明度就是为此调的。
 
-### 已知限制
+**觉得太吵？**
+设置里把透明度降到 25% 左右，或把数量调到 4–6 条，基本就只剩氛围了。
 
-- **浮在最上层，不是真正的"背景"**。DSH 目前没有"面板背后"的插槽；要画在面板下面只能替换 `root` 整个渲染树，那会顶掉出厂界面。所以鲸鱼是浮在界面之上的——默认 45% 透明度就是为此调的。
-- 全屏 canvas + 每帧重画一群矢量鲸鱼，属于稳定但非零的开销。嫌吵就调低数量/透明度，或者用 `混合：开` 让它更融进背景。
-- 只对 `web` profile 有意义（`dsh.client.platform = "web"`）。
+**没有气泡？**
+先看 设置 → Whale Aquarium 里 `Bubbles` 是不是被关掉了（这个开关会持久化，v0.1.2 起气泡本身也做得明显多了）。
 
-## 开发
+**会不会拖慢界面？**
+一个全屏 canvas，每帧重画一群矢量鲸鱼（默认 10 条 ≈ 750 段贝塞尔）——canvas2d 的常规负载。嫌吵就降数量/透明度，或者开混合模式让它更融入背景。
 
-```sh
-node test/smoke.mjs
-```
+**兼容性**
+在 DSH `0.1.2-rc.1` + macOS 上验证；只对 `web` profile 有意义（它是浏览器端插件）。
 
-这个测试把 `lib/client.js` 放进 `node:vm` 里跑：捕获 `__ModuleLoader__` 注册、用桩 `require('react')` 和桩 Cordis ctx 实例化插件、断言三个插槽都注册了，然后拿一个记录型 2D context 真的把 rAF 循环跑 24 帧（校验图形来自真实贝塞尔路径、清理后循环停止）。改完代码先跑它。
+## 它是怎么做的
 
-调默认值改 `lib/client.js` 里的 `DEFAULTS`。
+一句话：一个 npm 包，**宿主半是空的**，全部逻辑在浏览器半——用 DSH 官方的鲸鱼标志路径（含官方那两套游动姿态）画在一个 `shell.overlay` 浮层的 canvas 上，只往三个**增量插槽**里注册，不替换任何出厂 UI。
 
-### 发布（维护者）
+技术细节（包结构、`dsh.bundle` / `dsh.client` 双面契约、插槽选择、性能取舍）在 [docs/HOW-IT-WORKS.md](docs/HOW-IT-WORKS.md)；
+测试与发布流程在 [docs/MAINTAINING.md](docs/MAINTAINING.md)。
 
-分发只需要 GitHub，**不需要发 npm**——`dsh plugin` 是 pnpm 的转发器，`github:` 与 `file:` 规格都能装，并按真实包名对齐 `dsh.profile.bundles`。
+## 许可与致谢
 
-```sh
-git add -A && git commit -m "..." 
-git remote add origin git@github.com:<你>/KeepWhales.git
-git push -u origin main
-```
+MIT，见 [LICENSE](LICENSE)。
 
-**发布前先做一次真装验证**（比发布本身更重要）：
+鲸鱼标志及其两套官方游动姿态来自 DeepSeek Harness 的开源客户端包（`@deepseek-ai/dsh-client-ui-primitives`、`@deepseek-ai/dsh-client-ui-conversation`，同为 MIT）。标志本身是 DeepSeek 的品牌资产，本项目按官方 [BRAND_GUIDELINES.md](https://github.com/deepseek-ai/deepseek-harness/blob/master/BRAND_GUIDELINES.md) 使用：项目名只用推荐的缩写 "DSH"、不冒用完整商标、并明确声明非官方。
 
-```sh
-npm pack                                                   # 打 tarball
-dsh plugin --profile web add file:$PWD/dsh-whale-aquarium-0.1.0.tgz
-# 重启 dsh web，确认侧边栏底部出现鲸鱼标志图标、界面上有鱼
-dsh plugin --profile web remove dsh-whale-aquarium          # 不满意就撤
-```
-
-改了 `lib/` 之后记得升 `package.json` 的 `version`。
-
-**以后想上 npm**（可选）：`npm login` 后 `npm publish`；若改成自己的 scope（`@你/dsh-whale-aquarium`），首次发布要 `--access public` 或在 `package.json` 里加 `"publishConfig": { "access": "public" }`。注意 npm 的发布近似不可逆（`unpublish` 仅 72 小时内），所以务必先 `npm publish --dry-run` + 上面那次 tarball 安装。
-
-## 版权、商标与致谢
-
-**代码许可.** DSH 本体，以及鲸鱼路径的两个来源包（`@deepseek-ai/dsh-client-ui-primitives`、`@deepseek-ai/dsh-client-ui-conversation`）都是 MIT，`Copyright (c) DeepSeek`；因此复制与再分发这些路径数据在**著作权**层面是有明确授权的。本项目同样以 MIT 发布，见 [LICENSE](LICENSE)。
-
-**商标.** 鲸鱼标志同时是 DeepSeek 的品牌资产与商标，MIT 覆盖的是代码著作权，**不授予商标权**。本项目按 DSH 官方发布的 [BRAND_GUIDELINES.md](https://github.com/deepseek-ai/deepseek-harness/blob/master/BRAND_GUIDELINES.md) 使用：
-
-- 项目名使用官方推荐的缩写 **DSH**（`dsh-whale-aquarium`），未在项目名中使用完整的 "DeepSeek Harness" 商标；
-- 只在陈述事实关系时出现 "DeepSeek Harness" 字样（"a web plugin for DeepSeek Harness"）；
-- 明确声明**非官方**、无关联、未获授权或背书（见页首）；
-- 鲸鱼标志在这里只是被*渲染进界面*（一群在 DSH 里游动的 DSH 标志），不充当本项目的来源标识；仓库头像 / social preview 建议不要单独拿官方鲸鱼来充当。
-
-**致谢.** 鲸鱼标志与它的两套官方游动姿态（`FISH_LOGO_PATH`、`HERO_SWIM_UP_PATH`、`HERO_SWIM_DOWN_PATH`）来自 DeepSeek Harness 的开源客户端包，感谢 DeepSeek 把它开源出来。
-
-> 以上是本项目的合规实践说明，不构成法律意见。若上游认为某处用法不妥，请在 issue 里指出，我会立即调整。
+版本历史见 [CHANGELOG.md](CHANGELOG.md)。
 
 ---
 
 ## English
 
-A DSH **Profile Bundle** that adds a whale aquarium to the web UI. Distribute through GitHub — no npm release needed. Install, then restart the profile:
+**A whale aquarium for the DSH (DeepSeek Harness) web UI.** A school of the official DSH whale mark swims over the whole frame, flees your cursor, and scatters when you click. The layer is fully click-through.
 
 ```sh
-dsh plugin --profile web add github:<you>/KeepWhales   # or: file:/path/to/KeepWhales
+dsh plugin --profile web add github:<you>/KeepWhales
+dsh web   # restart the profile (a page reload is not enough)
 ```
 
-It uses the official whale mark paths (including the two official swim poses DSH itself uses), registers only additive slots (`shell.overlay`, `sidebar.footer.action`, `settings.section`), stays fully click-through, follows the active color scheme, and needs no build step. Toggle it from the whale-mark button at the sidebar foot; tune it under Settings → Whale Aquarium. Settings live in `localStorage`. Uninstall with `dsh plugin --profile web remove dsh-whale-aquarium`.
+Toggle it from the whale-mark button at the sidebar foot; tune it under **Settings → Whale Aquarium** (count, size, speed, opacity, shyness radius, bubbles, blend mode, facing). Settings persist in `localStorage` and are not written to DSH config.
 
-Unofficial fan plugin, not affiliated with or endorsed by DeepSeek.
+It uses the official whale mark paths — including the two official swim poses DSH itself renders — on a single `shell.overlay` canvas, and registers only additive slots. No build step: `lib/*.js` is the shipped artifact.
+
+Unofficial plugin, not affiliated with or endorsed by DeepSeek. MIT licensed.
