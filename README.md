@@ -1,4 +1,4 @@
-# 🐋 dsh-whale-aquarium
+# 🐳 dsh-whale-aquarium
 
 > **非官方插件 · Unofficial plugin.** 与 DeepSeek 无关联、未获其授权或背书。
 > Not affiliated with, authorized by, or endorsed by DeepSeek.
@@ -10,7 +10,7 @@ A whale aquarium for the DeepSeek Harness web UI: a school of the official DSH w
 - 用的是**官方鲸鱼路径**（`FISH_LOGO_PATH`），并且用的是 DSH 自己在会话首屏用的那两套官方游动姿态（`HERO_SWIM_UP_PATH` / `HERO_SWIM_DOWN_PATH`）——摆尾是逐控制点插值，不是 CSS 变形糊出来的。
 - 图层**完全穿透**：不挡点击、不挡输入、不影响任何快捷键。
 - 跟随明暗主题自动换色，深色是浅蓝鲸群 + 一条金色锦鲤，浅色是深海蓝。
-- 想在界面上留个开关：侧边栏底部有一个 🐋 按钮；细调在 设置 → Whale Aquarium。
+- 想在界面上留个开关：侧边栏底部有一个鲸鱼标志图标（就是官方标志本身，不是 emoji）；细调在 设置 → Whale Aquarium。
 
 ## 安装
 
@@ -54,7 +54,7 @@ dsh plugin --profile web remove dsh-whale-aquarium
 
 ## 使用
 
-- **侧边栏底部 🐋**：一键开关。
+- **侧边栏底部的鲸鱼标志图标**：一键开关（用的是官方标志 SVG，跟鱼群里游的是同一个图形）。
 - **设置 → Whale Aquarium**：数量 / 体型 / 游速 / 透明度 / 避险半径 / 气泡 / 混合模式 / 朝向翻转。
 - **鼠标靠近**鲸鱼会加速躲开，**点一下画面**整群会四散。
 - 设置存在浏览器 `localStorage`（`dsh-whale-aquarium/v1`），不写进 DSH 配置，也不会同步到别的浏览器。
@@ -74,7 +74,7 @@ dsh plugin --profile web remove dsh-whale-aquarium
 它只往三个**增量插槽**里注册，不替换任何出厂 UI：
 
 - `shell.overlay` — 整框浮层（在全部列之上、滚动容器之外、本身穿透点击），一个 `<canvas>` + 一个 rAF 循环；
-- `sidebar.footer.action` — 侧边栏底部的 🐋 开关；
+- `sidebar.footer.action` — 侧边栏底部的鲸鱼标志开关；
 - `settings.section` — 设置面板里的一页。
 
 所有副作用（canvas、监听器、样式）都在 `apply` 内创建、由 `ctx.slots` / `ctx.on` 的 disposer 持有，卸载即全部消失。
@@ -112,7 +112,7 @@ git push -u origin main
 ```sh
 npm pack                                                   # 打 tarball
 dsh plugin --profile web add file:$PWD/dsh-whale-aquarium-0.1.0.tgz
-# 重启 dsh web，确认侧边栏底部出现 🐋、界面上有鱼
+# 重启 dsh web，确认侧边栏底部出现鲸鱼标志图标、界面上有鱼
 dsh plugin --profile web remove dsh-whale-aquarium          # 不满意就撤
 ```
 
@@ -145,6 +145,6 @@ A DSH **Profile Bundle** that adds a whale aquarium to the web UI. Distribute th
 dsh plugin --profile web add github:<you>/KeepWhales   # or: file:/path/to/KeepWhales
 ```
 
-It uses the official whale mark paths (including the two official swim poses DSH itself uses), registers only additive slots (`shell.overlay`, `sidebar.footer.action`, `settings.section`), stays fully click-through, follows the active color scheme, and needs no build step. Toggle it from the 🐋 button at the sidebar foot; tune it under Settings → Whale Aquarium. Settings live in `localStorage`. Uninstall with `dsh plugin --profile web remove dsh-whale-aquarium`.
+It uses the official whale mark paths (including the two official swim poses DSH itself uses), registers only additive slots (`shell.overlay`, `sidebar.footer.action`, `settings.section`), stays fully click-through, follows the active color scheme, and needs no build step. Toggle it from the whale-mark button at the sidebar foot; tune it under Settings → Whale Aquarium. Settings live in `localStorage`. Uninstall with `dsh plugin --profile web remove dsh-whale-aquarium`.
 
 Unofficial fan plugin, not affiliated with or endorsed by DeepSeek.

@@ -165,12 +165,31 @@ assert.equal(frames, 25, 'cleanup must stop the loop (no further rAF requests)')
 
 /* ── the sidebar toggle and the settings page render ──────────────────────── */
 
+/** Resolve function components one level at a time (the stub does not render). */
+function render(node) {
+	let current = node
+	while (typeof current.type === 'function') current = current.type(current.props ?? {})
+	return current
+}
+
 for (const wide of [true, false]) {
 	const node = byName.get('sidebar.footer.action').component({ wide })
 	assert.equal(node.type, 'button')
 	assert.equal(node.props['aria-pressed'], true)
+
+	// The toggle must draw the official mark as an icon. An emoji glyph here is a
+	// real regression: 🐋 renders dolphin-ish on Apple's emoji font.
+	const glyph = render(node.children[0])
+	assert.equal(glyph.type, 'svg', 'the toggle icon must be the whale mark SVG, not an emoji')
+	assert.equal(glyph.props.viewBox, `0 0 23.16 17.0435`, 'the icon must use the mark viewBox')
+	assert.equal(glyph.props.fill, 'currentColor', 'the icon must follow the theme color')
+	assert.match(String(render(glyph).children[0].props.d), /^M22\.9168/, 'the icon must use the official mark path')
 }
-const page = byName.get('settings.section').component({ close() {} })
+
+const page = render(byName.get('settings.section').component({ close() {} }))
 assert.equal(page.type, 'div')
+const titleRow = page.children[0]
+assert.equal(titleRow.type, 'div')
+assert.equal(render(titleRow.children[0]).type, 'svg', 'the settings title must show the mark too')
 
 console.log('smoke: ok — bundle registers, plugin applies, 3 slots mount, whale loop paints', JSON.stringify(calls))
