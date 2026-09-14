@@ -108,7 +108,7 @@ dsh plugin --profile web remove dsh-whale-aquarium
 
 ## 许可与致谢
 
-MIT，见 [LICENSE](LICENSE)。
+MIT，见 [LICENSE](LICENSE)；不随主许可授予的事项（标志来源、非官方声明）见 [NOTICE.md](NOTICE.md)。
 
 鲸鱼标志及其两套官方游动姿态来自 DeepSeek Harness 的开源客户端包（`@deepseek-ai/dsh-client-ui-primitives`、`@deepseek-ai/dsh-client-ui-conversation`，同为 MIT）。标志本身是 DeepSeek 的品牌资产，本项目按官方 [BRAND_GUIDELINES.md](https://github.com/deepseek-ai/deepseek-harness/blob/master/BRAND_GUIDELINES.md) 使用：项目名只用推荐的缩写 "DSH"、不冒用完整商标、并明确声明非官方。
 

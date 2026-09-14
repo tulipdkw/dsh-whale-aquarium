@@ -1,6 +1,6 @@
 MIT License
 
-Copyright (c) 2025 dsh-whale-aquarium contributors
+Copyright (c) 2026 tulipdkw
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -19,11 +19,3 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
-
----
-
-Note on the whale mark: the SVG path data in lib/client.js is taken from the
-DeepSeek Harness client packages (@deepseek-ai/dsh-client-ui-primitives and
-@deepseek-ai/dsh-client-ui-conversation), which are MIT licensed. The mark
-itself is DeepSeek's brand asset; this project is an unofficial, unaffiliated
-fan plugin.
