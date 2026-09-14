@@ -1,5 +1,8 @@
 # 🐋 dsh-whale-aquarium
 
+> **非官方插件 · Unofficial plugin.** 与 DeepSeek 无关联、未获其授权或背书。
+> Not affiliated with, authorized by, or endorsed by DeepSeek.
+
 给 **DeepSeek Harness** Web UI 的鲸鱼水族箱：一群 DSH 官方鲸鱼标志在你整个界面之上游动，鼠标靠近就躲开，点一下整群四散。
 
 A whale aquarium for the DeepSeek Harness web UI: a school of the official DSH whale mark swimming over the whole frame, fleeing your cursor.
@@ -97,11 +100,20 @@ npm publish --access public          # 可选；不发 npm 也能用 github: 安
 
 改了 `lib/` 之后记得升 `version` 再发。
 
-## 版权与声明
+## 版权、商标与致谢
 
-- 鲸鱼标志路径取自 DeepSeek Harness 自带的客户端包（`@deepseek-ai/dsh-client-ui-primitives`、`@deepseek-ai/dsh-client-ui-conversation`，MIT）。标志本身是 DeepSeek 的品牌资产。
-- 这是一个**非官方**的趣味插件，与 DeepSeek 无关联、未获其背书。
-- 本项目代码以 MIT 发布，见 [LICENSE](LICENSE)。
+**代码许可.** DSH 本体，以及鲸鱼路径的两个来源包（`@deepseek-ai/dsh-client-ui-primitives`、`@deepseek-ai/dsh-client-ui-conversation`）都是 MIT，`Copyright (c) DeepSeek`；因此复制与再分发这些路径数据在**著作权**层面是有明确授权的。本项目同样以 MIT 发布，见 [LICENSE](LICENSE)。
+
+**商标.** 鲸鱼标志同时是 DeepSeek 的品牌资产与商标，MIT 覆盖的是代码著作权，**不授予商标权**。本项目按 DSH 官方发布的 [BRAND_GUIDELINES.md](https://github.com/deepseek-ai/deepseek-harness/blob/master/BRAND_GUIDELINES.md) 使用：
+
+- 项目名使用官方推荐的缩写 **DSH**（`dsh-whale-aquarium`），未在项目名中使用完整的 "DeepSeek Harness" 商标；
+- 只在陈述事实关系时出现 "DeepSeek Harness" 字样（"a web plugin for DeepSeek Harness"）；
+- 明确声明**非官方**、无关联、未获授权或背书（见页首）；
+- 鲸鱼标志在这里只是被*渲染进界面*（一群在 DSH 里游动的 DSH 标志），不充当本项目的来源标识；仓库头像 / social preview 建议不要单独拿官方鲸鱼来充当。
+
+**致谢.** 鲸鱼标志与它的两套官方游动姿态（`FISH_LOGO_PATH`、`HERO_SWIM_UP_PATH`、`HERO_SWIM_DOWN_PATH`）来自 DeepSeek Harness 的开源客户端包，感谢 DeepSeek 把它开源出来。
+
+> 以上是本项目的合规实践说明，不构成法律意见。若上游认为某处用法不妥，请在 issue 里指出，我会立即调整。
 
 ---
 
