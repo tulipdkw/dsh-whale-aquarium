@@ -73,10 +73,11 @@ dsh  deepseek-harness  cordis-plugin  whale  aquarium  wallpaper  web-ui  easter
 
 **注意（以后要发 npm 时）**：README 用的是相对路径 `docs/images/aquarium.png`，而 `docs/` 不在 `package.json` 的 `files` 白名单里，**npm 页面上这张图会裂**。要么把图片加进 `files`，要么把 README 里的路径换成 `https://raw.githubusercontent.com/tulipdkw/dsh-whale-aquarium/main/docs/images/aquarium.png`（GitHub 和 npm 两边都能显示）。
 
-可选徽章（CI 通过后可以直接粘到 README 顶部）：
+README 顶部已有 CI 徽章与 MIT 徽章（CI 通过后会显示绿勾）：
 
 ```markdown
 [![test](https://github.com/tulipdkw/dsh-whale-aquarium/actions/workflows/test.yml/badge.svg)](https://github.com/tulipdkw/dsh-whale-aquarium/actions/workflows/test.yml)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 ```
 
 ## 分发方式

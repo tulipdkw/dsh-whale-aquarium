@@ -1,5 +1,8 @@
 # 🐳 dsh-whale-aquarium
 
+[![test](https://github.com/tulipdkw/dsh-whale-aquarium/actions/workflows/test.yml/badge.svg)](https://github.com/tulipdkw/dsh-whale-aquarium/actions/workflows/test.yml)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+
 **给 DSH（DeepSeek Harness）Web 界面养一缸鲸鱼。**
 
 一群 DSH 官方鲸鱼标志在你整个界面之上游动：鼠标靠近就加速躲开，点一下画面整群四散。图层完全穿透——不挡点击、不挡输入、不影响任何快捷键。
