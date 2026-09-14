@@ -74,7 +74,7 @@ dsh  deepseek-harness  cordis-plugin  whale  aquarium  wallpaper  web-ui  easter
 可选徽章（把 `<你>` 换成用户名后放进 README 顶部）：
 
 ```markdown
-[![test](https://github.com/<你>/KeepWhales/actions/workflows/test.yml/badge.svg)](https://github.com/<你>/KeepWhales/actions/workflows/test.yml)
+[![test](https://github.com/<你>/dsh-whale-aquarium/actions/workflows/test.yml/badge.svg)](https://github.com/<你>/dsh-whale-aquarium/actions/workflows/test.yml)
 ```
 
 ## 分发方式
