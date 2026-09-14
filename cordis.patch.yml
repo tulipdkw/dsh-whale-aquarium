@@ -1,0 +1,14 @@
+# dsh-whale-aquarium — profile patch layer.
+#
+# This package is a DSH Profile Bundle: it declares `dsh.bundle.patch` in
+# package.json, so `dsh plugin --profile web add dsh-whale-aquarium` appends it to
+# that profile's `dsh.profile.bundles` layer stack, and the row below is inserted
+# into the composed tree.
+#
+# One row is enough. The row's package also declares `dsh.client` (platform web),
+# so the browser modules scan picks up `exports["./client"]` (lib/client.js) and
+# puts it in the `window.__DSH_BOOT__` graph — the empty node half in
+# lib/index.js only exists so Loader has a host-side row to mount.
+- insert:
+    - id: whale-aquarium
+      name: 'dsh-whale-aquarium'
