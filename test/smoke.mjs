@@ -125,10 +125,14 @@ assert.equal(byName.get('settings.section').options.id, 'whale-aquarium')
 const calls = { arc: 0, bezierCurveTo: 0, clearRect: 0, fill: 0, stroke: 0 }
 /** Alpha in force at each stroke() — bubbles are the only stroked primitive. */
 const strokeAlphas = []
+/** Every color actually painted, so palette regressions are catchable. */
+const fillColors = new Set()
+const strokeColors = new Set()
 const g = {
 	beginPath() {}, bezierCurveTo() { calls.bezierCurveTo++ }, arc() { calls.arc++ },
-	closePath() {}, lineTo() {}, moveTo() {}, fill() { calls.fill++ },
-	stroke() { calls.stroke++; strokeAlphas.push(g.globalAlpha) },
+	closePath() {}, lineTo() {}, moveTo() {},
+	fill() { calls.fill++; fillColors.add(g.fillStyle) },
+	stroke() { calls.stroke++; strokeAlphas.push(g.globalAlpha); strokeColors.add(g.strokeStyle) },
 	clearRect() { calls.clearRect++ }, restore() {}, rotate() {}, save() {}, scale() {},
 	setTransform() {}, translate() {},
 	fillStyle: '', globalAlpha: 1, lineWidth: 1, strokeStyle: '',
@@ -169,6 +173,14 @@ assert.ok(calls.bezierCurveTo > 0, 'whales are drawn from the real bezier paths'
 assert.ok(strokeAlphas.length > 0, 'bubbles must spawn and be stroked')
 const maxStrokeAlpha = Math.max(...strokeAlphas)
 assert.ok(maxStrokeAlpha >= 0.5, `bubble strokes must be visible, got max alpha ${maxStrokeAlpha}`)
+
+// Palette: this run is LIGHT-scheme (the stub theme says so). Bubbles must stay
+// light there too — the first pass mirrored the theme into a navy rim and read as
+// "the bubbles went dark" — and every bubble that can resolve one carries a filled
+// white shine.
+assert.ok(!strokeColors.has('#0c4a6e'), 'light-scheme bubbles must not use the dark navy rim')
+assert.ok(fillColors.has('#ffffff'), 'bubbles must paint a filled white shine')
+assert.ok(fillColors.has('#38bdf8'), 'light-scheme bubbles must use the soft sky body tint')
 cleanup()
 assert.equal(frames, 25, 'cleanup must stop the loop (no further rAF requests)')
 
